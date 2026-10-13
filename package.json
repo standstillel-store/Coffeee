@@ -1,0 +1,38 @@
+{
+  "name": "ambang-coffee-house-3d",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Situs coffee house imersif dengan navigasi berbasis ruang (CSS 3D perspective). Brand, menu, harga, dan ulasan adalah data demo.",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "check:build": "node scripts/build-check.mjs --dev",
+    "check:layout": "node scripts/audit-layout.mjs",
+    "check:landing": "node scripts/audit-layout.mjs --hero-sweep",
+    "check:brand": "node scripts/audit-layout.mjs --brand-sweep",
+    "check:transition": "node scripts/verify-transition.mjs",
+    "check:keys": "node scripts/verify-keys.mjs"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "esbuild": "^0.28.0",
+    "playwright": "^1.56.0",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3",
+    "vite": "^7.0.0"
+  }
+}

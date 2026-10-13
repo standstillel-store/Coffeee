@@ -1,0 +1,145 @@
+/*
+ * Panggung 3D.
+ *
+ *   .stage      fixed, memegang `perspective`
+ *   .world      preserve-3d; kamera menggeser seluruh dunia pada sumbu z
+ *   .room       bidang datar pada z = -i * step (diatur oleh mesin kamera)
+ *
+ * Nilai --P, --Pn, --step, --o, --blur, --bright ditulis oleh src/lib/rig.ts.
+ * Catatan: opacity/filter pada elemen preserve-3d akan meratakan anak-anaknya,
+ * sehingga pose kedalaman dipakai pada daun (.leaf), bukan pada .room.
+ */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  perspective: var(--P, 1200px);
+  perspective-origin: 50% 50%;
+  background: var(--ink-0);
+}
+
+.scroll-spacer {
+  width: 100%;
+  height: 800vh; /* nilai cadangan; diganti oleh mesin kamera */
+  pointer-events: none;
+}
+
+/* ------------------------------ latar ------------------------------ */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* cahaya hangat terarah dari kiri-atas, seperti lampu gantung di atas meja */
+.backdrop__light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 55% at 62% 38%, rgba(201, 141, 78, 0.2), rgba(201, 141, 78, 0) 70%),
+    radial-gradient(ellipse 90% 70% at 20% 0%, rgba(120, 72, 38, 0.28), rgba(120, 72, 38, 0) 65%);
+}
+
+/* bidang meja: garis cahaya tipis dan lantai yang sedikit lebih terang */
+.backdrop__floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42%;
+  background: linear-gradient(to bottom, rgba(241, 230, 211, 0) 0%, rgba(241, 230, 211, 0.035) 100%);
+  mask-image: linear-gradient(to bottom, transparent, #000 40%);
+}
+
+.backdrop__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 85% 80% at 50% 48%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.72) 100%);
+}
+
+.backdrop__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.92  0 0 0 0 0.8  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+}
+
+/* ------------------------------ dunia ------------------------------ */
+
+.world {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.room {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.room[data-visible='0'] {
+  visibility: hidden;
+}
+
+.room__plane {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* Hanya ruang aktif yang menerima sentuhan/klik, dan hanya pada kontrolnya. */
+.room *,
+.room {
+  pointer-events: none;
+}
+.room[data-active] :is(button, a[href], [tabindex], input, select, textarea) {
+  pointer-events: auto;
+}
+/* Ruang yang isinya bisa lebih tinggi dari layar (jaring pengaman) menggulir isinya sendiri;
+   bila tidak ada yang bisa digulir, gestur diteruskan ke halaman (kamera). */
+.room[data-active] :is(.detail, .finale) {
+  pointer-events: auto;
+}
+
+/*
+ * Pose kedalaman. `.leaf` adalah blok isi yang dipengaruhi kedalaman ruang:
+ * lebih jauh = lebih redup dan sedikit buram; sudah dilewati = memudar.
+ */
+.leaf {
+  opacity: var(--o, 1);
+  filter: blur(var(--blur, 0px)) brightness(var(--bright, 1));
+}
+
+/* Lapisan dengan kedalaman sendiri di dalam ruang (hero). Kompensasi skala
+   menjaga ukuran terlihat sama saat diam; paralaks muncul saat kamera bergerak. */
+.layer {
+  transform: translateZ(calc(var(--z, 0) * 1px)) scale(calc(1 - var(--z, 0) / var(--Pn, 1200)));
+}
+
+/* ----------------------- gerak dikurangi (reduced) ----------------------- */
+
+.stage[data-motion='reduced'] {
+  perspective: none;
+}
+.stage[data-motion='reduced'] .world {
+  transform: none !important;
+  will-change: auto;
+}
+.stage[data-motion='reduced'] .room {
+  transform: none !important;
+  transition: opacity 0.25s linear;
+  opacity: var(--o, 1);
+}
+.stage[data-motion='reduced'] .room .leaf {
+  opacity: 1;
+  filter: none;
+}
+.stage[data-motion='reduced'] .layer {
+  transform: none;
+}

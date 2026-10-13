@@ -1,0 +1,437 @@
+/* Ruang terakhir: ulasan yang dapat digeser, lalu penutup. */
+
+.finale {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(10px, 2.6svh, 30px);
+  padding: calc(var(--hud-top) + 6px) 0 var(--hud-bottom);
+
+  --rv-w: clamp(260px, 29vw, 430px);
+  --rv-gap: clamp(14px, 2vw, 32px);
+}
+
+.finale__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  padding: 0 calc(var(--gutter) + 40px) 0 var(--gutter);
+}
+
+.finale__kicker {
+  width: 100%;
+  font: 700 0.68rem/1 var(--font-ui);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cream-3);
+}
+
+.finale__title {
+  font: 400 clamp(2.2rem, min(5.2vw, 8svh), 5.4rem) / 0.95 var(--font-display);
+  letter-spacing: -0.012em;
+  color: var(--cream);
+}
+
+.finale__demo {
+  padding: 7px 12px;
+  border: 1px solid var(--caramel);
+  font: 700 0.64rem/1.2 var(--font-ui);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--caramel);
+}
+
+/* -------- carousel -------- */
+
+.reviews {
+  position: relative;
+}
+
+.reviews__track {
+  position: relative;
+  display: flex;
+  gap: var(--rv-gap);
+  padding: 14px calc(50% - var(--rv-w) / 2) 22px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  cursor: grab;
+  /* tepi memudar: galeri terasa berlanjut ke luar layar */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 17%, #000 83%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 17%, #000 83%, transparent 100%);
+}
+.reviews__track::-webkit-scrollbar {
+  display: none;
+}
+.reviews__track.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+.reviews__track:focus-visible {
+  outline-offset: -6px;
+}
+
+.review {
+  --f: 0;
+  flex: 0 0 var(--rv-w);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.8svh, 16px);
+  min-height: clamp(208px, 31svh, 330px);
+  padding: clamp(16px, 2.6svh, 24px) 26px clamp(14px, 2.2svh, 22px);
+  scroll-snap-align: center;
+  background: linear-gradient(to bottom, rgba(241, 230, 211, 0.075), rgba(241, 230, 211, 0.025));
+  border-top: 1px solid rgba(241, 230, 211, 0.34);
+  box-shadow: 0 34px 50px -30px rgba(0, 0, 0, 0.85);
+  /* fokus di tengah: besar, terang, tajam. Tepi: kecil, redup, buram halus. */
+  opacity: calc(0.2 + 0.8 * var(--f));
+  transform: scale(calc(0.86 + 0.14 * var(--f)));
+  filter: blur(calc((1 - var(--f)) * 2.2px));
+}
+
+.review__tag {
+  font: 700 0.6rem/1 var(--font-ui);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--caramel);
+}
+
+.stars {
+  display: inline-flex;
+  gap: 3px;
+}
+.stars__star {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--cream-3);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.stars__star[data-on='true'] {
+  fill: var(--caramel);
+  stroke: var(--caramel);
+}
+
+.review__text {
+  flex: 1;
+  font: 400 clamp(1.02rem, min(1.5vw, 2.8svh), 1.4rem) / 1.32 var(--font-display);
+  color: var(--cream);
+  text-wrap: pretty;
+}
+
+.review__who {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.8rem;
+  color: var(--cream-2);
+}
+.review__sample {
+  color: var(--cream-3);
+}
+.review__item {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cream-3);
+}
+
+.reviews__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 4vw, 44px);
+}
+.reviews__btn {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 700 0.68rem/1 var(--font-ui);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cream);
+}
+.reviews__btn:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+.reviews__count {
+  min-width: 5ch;
+  text-align: center;
+  font: 400 1.05rem/1 var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--cream-2);
+}
+
+/* -------- penutup -------- */
+
+.finale__close {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 0 var(--gutter);
+  text-align: center;
+}
+.finale__bye {
+  font: 400 clamp(1.5rem, 2.8vw, 2.6rem) / 1.1 var(--font-display);
+  color: var(--cream);
+}
+.finale__restart {
+  min-height: 46px;
+  padding: 0 26px;
+  border: 1px solid var(--cream-3);
+  background: transparent;
+  cursor: pointer;
+  font: 700 0.7rem/1 var(--font-ui);
+  letter-spacing: 0.26em;
+  text-indent: 0.26em;
+  text-transform: uppercase;
+  color: var(--cream);
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+@media (hover: hover) {
+  .finale__restart:hover {
+    background: var(--cream);
+    border-color: var(--cream);
+    color: var(--ink-0);
+  }
+}
+.finale__notice {
+  max-width: 52ch;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--cream-3);
+  text-wrap: balance;
+}
+
+/* laptop pendek: judul penutup dan tombol berdampingan agar semuanya muat di antara logo dan bilah bawah */
+@media (min-width: 721px) and (max-height: 800px) {
+  .finale__close {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 28px;
+  }
+  .finale__notice {
+    flex-basis: 100%;
+    max-width: 84ch;
+  }
+}
+
+@media (max-width: 720px) {
+  .finale {
+    --rv-w: min(68vw, 300px);
+    gap: 12px;
+  }
+  /* di ponsel tepi tidak boleh terlalu memudar, supaya kartu tetangga terlihat dan petunjuk geser jelas */
+  .reviews__track {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+  }
+  .finale__head {
+    padding: 0 var(--gutter);
+  }
+  .finale__title {
+    font-size: 2.6rem;
+  }
+  .review {
+    min-height: 236px;
+    padding: 20px 20px 18px;
+    gap: 12px;
+  }
+  .review__text {
+    font-size: 1.05rem;
+  }
+  .finale__close {
+    gap: 10px;
+  }
+  .finale__bye {
+    font-size: 1.45rem;
+  }
+}
+
+@media (max-height: 640px) {
+  .finale__notice {
+    display: none;
+  }
+}
+
+/* ponsel potret pendek (mis. 360x640) */
+@media (max-width: 720px) and (max-height: 700px) {
+  .finale {
+    gap: 8px;
+    padding-top: var(--hud-top);
+    justify-content: flex-start;
+    justify-content: safe center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .finale__kicker {
+    display: none;
+  }
+  .finale__title {
+    font-size: 2.2rem;
+  }
+  .review {
+    min-height: 186px;
+    padding: 16px 18px 14px;
+    gap: 8px;
+  }
+  .finale__bye {
+    font-size: 1.2rem;
+  }
+}
+
+/* ponsel potret kecil (mis. 320x568): judul dan label contoh sebaris, kartu lebih rapat, nama + menu satu baris */
+@media (max-width: 720px) and (max-height: 600px) and (max-aspect-ratio: 1/1) {
+  .finale {
+    gap: 6px;
+  }
+  .finale__head {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+  }
+  .finale__title {
+    font-size: 1.9rem;
+  }
+  .finale__demo {
+    max-width: 196px;
+    padding: 5px 8px;
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+  }
+  .reviews__track {
+    padding-top: 4px;
+    padding-bottom: 10px;
+  }
+  .review {
+    min-height: 0;
+    padding: 14px 16px 12px;
+    gap: 7px;
+  }
+  .review__text {
+    font-size: 0.98rem;
+    line-height: 1.28;
+  }
+  .review__who {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+  }
+  .reviews__btn {
+    min-height: 40px;
+  }
+  .finale__close {
+    gap: 6px;
+  }
+  .finale__bye {
+    font-size: 1.1rem;
+  }
+  .finale__restart {
+    min-height: 40px;
+  }
+}
+
+/* lebar sempit: label tombol ulasan tidak boleh terpecah ke dua baris */
+.reviews__btn {
+  white-space: nowrap;
+}
+@media (max-width: 380px) {
+  .reviews__controls {
+    gap: 8px;
+  }
+  .reviews__btn {
+    padding: 0 2px;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* tinggi sangat pendek (ponsel lanskap, jendela rendah) */
+@media (max-height: 560px) {
+  .finale {
+    gap: 6px;
+    padding-top: var(--hud-top);
+    justify-content: flex-start;
+    justify-content: safe center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    /* kartu lebih lebar agar kutipan cukup 2-3 baris */
+    --rv-w: clamp(260px, 48vw, 400px);
+  }
+  .finale__head {
+    align-items: center;
+  }
+  .finale__kicker,
+  .finale__notice {
+    display: none;
+  }
+  .finale__title {
+    font-size: 1.9rem;
+  }
+  .reviews__track {
+    padding-top: 4px;
+    padding-bottom: 12px;
+  }
+  /* label "contoh" dan bintang sebaris; kutipan dan nama menempati baris penuh */
+  .review {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 0;
+    padding: 12px 16px;
+    gap: 6px 10px;
+  }
+  .review__text,
+  .review__who {
+    flex: 1 1 100%;
+  }
+  .review__text {
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+  .review__who {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+  }
+  .reviews__btn {
+    min-height: 36px;
+  }
+  .finale__close {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 20px;
+  }
+  .finale__bye {
+    font-size: 1.15rem;
+  }
+  .finale__restart {
+    min-height: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review {
+    transition: none;
+  }
+}

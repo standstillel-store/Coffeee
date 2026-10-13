@@ -1,0 +1,466 @@
+/* Ruang 1: landing. Nama brand paling jauh, cangkir paling dekat. */
+
+.hero {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+
+  --cup-h: min(64svh, 52vw);
+  --cup-w: calc(var(--cup-h) * 0.7069); /* rasio potongan 504 x 713 */
+  /* Kedua belahan nama harus muat di kiri/kanan cangkir. --half-em = lebar belahan terlebar dalam em.
+     Nilai awal = tiga huruf kapital Gloock (mis. "AMB"); useWordmarkFit menimpanya dengan hasil ukur
+     sebenarnya, sehingga nama berapa pun panjang dan lebar hurufnya tetap muat. Dua belahan = 2 x --half-em. */
+  /* Sisa lebar dikurangi 2 x gutter + 48px: nama tidak boleh menyentuh rel penanda ruang di tepi kanan (garis 14-34px + label).
+     Tinggi huruf dibatasi 26svh dan 280px supaya pada layar tinggi/raksasa huruf terakhir tidak menabrak label rel. */
+  --half-em: 2.35;
+  --word-div: calc(var(--half-em) * 2);
+  --word-fs: min(calc((100vw - var(--cup-w) * 0.8 - var(--gutter) * 2 - 48px) / var(--word-div)), 26svh, 280px);
+
+  /* Kedalaman (px) dua lapisan paralaks. Dipakai dua kali: sebagai --z lapisan itu sendiri, dan untuk
+     menghitung berapa jauh perspektif menggeser posisi proyeksinya dari titik hilang (tier potret di bawah).
+     Rumusnya: lapisan di kedalaman z tampak berpindah  k = z / (P - z)  kali jaraknya dari titik hilang. */
+  --z-brand: -150;
+  --z-cup: 60;
+  --k-brand: calc(var(--z-brand) / (var(--Pn, 1200) - var(--z-brand)));
+  --k-cup: calc(var(--z-cup) / (var(--Pn, 1200) - var(--z-cup)));
+}
+
+/* Gerak dikurangi: tidak ada perspektif, jadi tidak ada pergeseran yang perlu dikompensasi. */
+.stage[data-motion='reduced'] .hero {
+  --k-brand: 0;
+  --k-cup: 0;
+}
+
+/* -------- nama brand -------- */
+
+.hero__brand {
+  --z: var(--z-brand);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -56%;
+  font: 400 1rem/1 var(--font-display);
+  color: var(--cream);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.hero__words {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--cup-w) * 0.8);
+  font-size: var(--word-fs);
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+}
+
+/* Huruf menerima cahaya dari atas: terang di tepi atas, jatuh ke cokelat di bawah.
+   Gradien dipasang pada tiap belahan (bukan induknya) karena background-clip:text
+   tidak ikut mengecat anak yang membentuk stacking context (animasi transform). */
+.hero__half {
+  display: block;
+  /* Di tata letak lebar kedua belahan dibuat sama lebar (selebar belahan terlebar) dan hurufnya merapat ke gelas,
+     sehingga sambungan nama jatuh tepat di sumbu gelas walau kiri dan kanan beda panjang ("KOPI KE" | "NANGAN"). */
+  width: calc(var(--half-em) * 1em);
+  padding: 0.04em 0.02em;
+  background: linear-gradient(to bottom, #f6ecda 0%, #e6d5b8 52%, #a98a62 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.hero__half--l {
+  text-align: right;
+}
+.hero__half--r {
+  text-align: left;
+}
+
+/* Di tata letak lebar, tengah nama brand ditempati cangkir; keterangan ditaruh di bawah "AMB"
+   (rata kiri) supaya terbaca, bukan tersembunyi di belakang gelas. */
+.hero__tag {
+  display: block;
+  /* tidak melebihi lebar belahan kiri: keterangan yang panjang turun ke baris kedua, bukan masuk ke bawah gelas */
+  max-width: calc(var(--word-fs) * var(--half-em));
+  margin-top: 1.9em;
+  font: 700 0.72rem/1.25 var(--font-ui);
+  letter-spacing: 0.52em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: normal;
+  color: var(--cream-2);
+}
+.hero__tag:empty {
+  display: none;
+}
+
+/* -------- cangkir -------- */
+
+.hero__cup {
+  --z: var(--z-cup);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  height: var(--cup-h);
+  aspect-ratio: 504 / 713;
+}
+
+.hero__img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* sedikit kontras agar putih susu tidak "meledak" di latar gelap */
+  filter: brightness(0.96) contrast(1.05) saturate(1.04);
+}
+
+.hero__glow {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 230%;
+  height: 150%;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(214, 150, 84, 0.34), rgba(214, 150, 84, 0.1) 48%, rgba(214, 150, 84, 0) 74%);
+  z-index: -1;
+}
+
+/* bayangan kontak di meja, jatuh sedikit ke kiri-bawah dari sumber cahaya kanan-atas */
+.hero__ground {
+  position: absolute;
+  left: 46%;
+  bottom: -2.6%;
+  width: 124%;
+  height: 8.5%;
+  translate: -50% 0;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.55) 52%, rgba(0, 0, 0, 0) 100%);
+  filter: blur(5px);
+  z-index: -1;
+}
+
+/* -------- teks pendukung -------- */
+
+.hero__headline {
+  position: absolute;
+  left: var(--gutter);
+  bottom: calc(var(--hud-bottom) + 18px);
+  max-width: 11em;
+  font: 400 clamp(1.45rem, 2.5vw, 2.5rem) / 1.08 var(--font-display);
+  color: var(--cream);
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+.hero__desc {
+  position: absolute;
+  right: calc(var(--gutter) + 52px);
+  bottom: calc(var(--hud-bottom) + 20px);
+  max-width: 26ch;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--cream-2);
+  text-wrap: pretty;
+}
+
+.hero__cue {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px 0;
+  min-height: 44px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: 700 0.68rem/1 var(--font-ui);
+  letter-spacing: 0.32em;
+  text-indent: 0.32em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--cream);
+}
+
+.hero__cue-line {
+  display: block;
+  width: 1px;
+  height: 34px;
+  background: var(--cream);
+  transform-origin: top;
+  opacity: 0.8;
+}
+
+.hero[data-live='true'] .hero__cue-line {
+  animation: cue 2.6s var(--ease-door) 2.2s infinite;
+}
+
+@keyframes cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  48% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  52% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+/* -------- animasi pembuka (satu kali, ~1,5 detik) --------
+   Cangkir muncul dari kedalaman; kedua belahan nama brand membuka seperti daun pintu. */
+
+.hero__img {
+  animation: cup-in 1.35s var(--ease-out) 0.05s both;
+}
+.hero__half--l {
+  animation: door-l 1.3s var(--ease-out) 0.2s both;
+}
+.hero__half--r {
+  animation: door-r 1.3s var(--ease-out) 0.2s both;
+}
+.hero__tag {
+  animation: rise 0.9s var(--ease-out) 0.85s both;
+}
+.hero__headline {
+  animation: rise 0.9s var(--ease-out) 0.95s both;
+}
+.hero__desc {
+  animation: rise 0.9s var(--ease-out) 1.05s both;
+}
+.hero__cue > span:first-child {
+  animation: rise 0.9s var(--ease-out) 1.2s both;
+}
+.hero__cue-line {
+  animation: grow 0.9s var(--ease-out) 1.25s both;
+}
+
+@keyframes cup-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 5%, 0) scale(0.93);
+    filter: blur(12px) brightness(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: brightness(0.96) contrast(1.05) saturate(1.04);
+  }
+}
+
+@keyframes door-l {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--cup-w) * 0.55), 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes door-r {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--cup-w) * -0.55), 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* -------- layar sempit / potret -------- */
+
+@media (max-width: 720px), (max-aspect-ratio: 4/5) {
+  .hero {
+    --hl-fs: clamp(1.3rem, 6.4vw, 1.9rem);
+    /* Gelas berakhir di 55% + cup/2; di bawahnya harus muat headline satu baris (dasarnya hud-bottom + 22px)
+       plus napas 10px. Pada ponsel 640px ke atas batas ini tidak aktif (46svh lebih kecil); ia hanya
+       menyusutkan gelas pada jendela yang pendek (mis. 600x568) supaya headline tidak menyentuh dasar gelas. */
+    --cup-h: max(96px, min(46svh, 92vw, calc(90svh - 2 * (var(--hud-bottom) + 32px + var(--hl-fs) * 1.08))));
+    --word-fs: calc(88vw / var(--word-div));
+  }
+  /* Nama brand dan keterangannya ditambatkan pada tepi atas cangkir: keterangan selalu berjarak 12px
+     di atas gelas berapa pun tinggi layarnya (dulu tertutup es batu di ponsel yang pendek).
+     Kedua lapisan punya kedalaman berbeda, jadi perspektif menggeser keduanya ke arah titik hilang dengan
+     besar berbeda. Tambatan dihitung pada posisi PROYEKSI (bukan posisi tata letak):
+       tepi atas cangkir  = 55% - cup/2 + 5% * k_cup
+       dasar blok nama    = T + (T - 50%) * k_brand        (asal transform di dasar blok, tinggi blok saling meniadakan)
+     lalu T dicari agar dasar blok = tepi atas cangkir - 12px. */
+  .hero__brand {
+    top: calc((55% + 5% * var(--k-cup) - var(--cup-h) / 2 - 12px + 50% * var(--k-brand)) / (1 + var(--k-brand)));
+    bottom: auto;
+    translate: -50% -100%;
+    transform-origin: 50% 100%;
+  }
+  .hero__words {
+    gap: 0;
+  }
+  /* nama utuh di atas gelas (tanpa gelas di tengahnya): kedua belahan berimpit pada lebar alaminya, dirata-tengahkan */
+  .hero__half {
+    width: auto;
+  }
+  .hero__tag {
+    max-width: calc(var(--word-fs) * var(--half-em) * 2); /* selebar seluruh nama (kedua belahan berimpit) */
+    margin-top: 1.5em;
+    font-size: 0.64rem;
+    text-align: center;
+    text-indent: 0.52em; /* mengimbangi jarak huruf di ujung agar benar-benar di tengah */
+  }
+  .hero__cup {
+    top: 55%;
+  }
+  .hero__headline {
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: calc(var(--hud-bottom) + 22px);
+    max-width: none;
+    text-align: center;
+    font-size: var(--hl-fs);
+  }
+  .hero__desc {
+    display: none;
+  }
+  .hero__cue {
+    bottom: 14px;
+  }
+}
+
+/* Potret yang sangat pendek (mis. jendela terbagi dua di ponsel, 375x390): tidak muat gelas + headline +
+   isyarat gulir sekaligus. Headline mengalah; isyarat gulir (satu-satunya petunjuk interaksi) tetap. */
+@media (max-height: 520px) and (orientation: portrait) {
+  .hero {
+    --word-fs: min(calc(88vw / var(--word-div)), 16svh);
+    /* tanpa headline, yang di bawah gelas tinggal isyarat gulir: teksnya mulai ~71px dari dasar layar */
+    --cup-h: max(96px, min(46svh, 92vw, calc(90svh - 170px)));
+  }
+  .hero__headline {
+    display: none;
+  }
+}
+
+/* -------- ponsel lanskap dan jendela pendek --------
+   Kembali ke tata letak lebar (nama brand terbelah di kiri-kanan cangkir) tetapi dengan cangkir lebih kecil,
+   dan teks pendukung tidak boleh menyentuh gelas. Harus berada setelah tier potret di atas. */
+
+@media (max-height: 560px) and (min-aspect-ratio: 1/1) {
+  .hero {
+    --cup-h: min(54svh, 40vw);
+    --word-fs: min(calc((100vw - var(--cup-w) * 0.8 - var(--gutter) * 2 - 48px) / var(--word-div)), 30svh);
+  }
+  .hero__brand {
+    top: 46%;
+    bottom: auto;
+    translate: -50% -56%;
+    transform-origin: 50% 50%;
+  }
+  .hero__words {
+    gap: calc(var(--cup-w) * 0.8);
+  }
+  .hero__half {
+    width: calc(var(--half-em) * 1em); /* kembali sama lebar (tier potret melepasnya) */
+  }
+  .hero__tag {
+    max-width: calc(var(--word-fs) * var(--half-em)); /* kembali selebar belahan kiri (tier potret melebarkannya) */
+    margin-top: 1.1em;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-align: left;
+    text-indent: 0;
+  }
+  .hero__cup {
+    top: 46%;
+  }
+  .hero__headline {
+    left: var(--gutter);
+    right: auto;
+    bottom: 14px;
+    max-width: 11em;
+    text-align: left;
+    font-size: clamp(1.05rem, 5.2svh, 1.5rem);
+  }
+  .hero__desc {
+    display: block;
+    right: calc(var(--gutter) + 52px);
+    bottom: 14px;
+    max-width: 24ch;
+    font-size: 0.76rem;
+    line-height: 1.45;
+  }
+  .hero__cue {
+    bottom: 4px;
+    min-height: 36px;
+    padding-top: 6px;
+    gap: 6px;
+  }
+  .hero__cue-line {
+    height: 14px;
+  }
+}
+/* rel ruang di tepi kanan disembunyikan pada lebar ini, jadi deskripsi boleh lebih ke tepi */
+@media (max-height: 560px) and (min-aspect-ratio: 1/1) and (max-width: 720px) {
+  .hero__desc {
+    right: var(--gutter);
+  }
+}
+/* tidak cukup lebar untuk headline + isyarat gulir + deskripsi sekaligus */
+@media (max-height: 560px) and (min-aspect-ratio: 1/1) and (max-width: 620px) {
+  .hero__desc {
+    display: none;
+  }
+}
+/* dan di bawah 600px headline pun bertabrakan dengan isyarat gulir yang ada di tengah */
+@media (max-height: 560px) and (min-aspect-ratio: 1/1) and (max-width: 600px) {
+  .hero__headline {
+    display: none;
+  }
+}
+
+/* Jendela lanskap menengah yang tidak pendek (mis. 800x600, 844x700): kolom kanan antara tepi gelas dan
+   tepi layar kurang dari lebar deskripsi, sehingga deskripsi menempel pada alas gelas. Headline dan isyarat
+   gulir sudah memuat pesan yang sama, jadi deskripsi dilepas di rentang ini. */
+@media (min-width: 721px) and (max-width: 899px) and (min-height: 561px) and (min-aspect-ratio: 1/1) {
+  .hero__desc {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero *,
+  .hero *::before,
+  .hero *::after {
+    animation: none !important;
+  }
+}
